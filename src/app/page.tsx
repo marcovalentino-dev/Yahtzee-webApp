@@ -48,12 +48,17 @@ export default function YahtzeeGame() {
     }));
   };
 
+  function isNumber(value: ScoreValue): value is number {
+    return typeof value === "number";
+  }
+  
   const totalScore = (player: PlayerName): number => {
     return Object.values(scores[player] || {}).reduce(
-      (sum, val) => sum + (typeof val === "number" ? val : 0),
-      0
+  	(sum, val) => sum + (isNumber(val) ? val : 0),
+  	0
     );
   };
+
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-200 to-sky-300 p-6">
