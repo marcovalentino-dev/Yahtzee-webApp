@@ -15,8 +15,14 @@ const categories = [
 type Category = typeof categories[number];
 type ScoreValue = number | ""; // Può essere numero o stringa vuota
 type PlayerName = string;
+type ScoreSheet = Record<string, ScoreValue>;
+type ScoreState = Record<PlayerName, ScoreSheet>;
 
 type Scores = Record<PlayerName, Partial<Record<Category, ScoreValue>>>;
+
+  function isNumber(value: ScoreValue): value is number {
+    return typeof value === "number";
+  }
 
 export default function YahtzeeGame() {
   const [players, setPlayers] = useState<PlayerName[]>([]);
@@ -47,18 +53,11 @@ export default function YahtzeeGame() {
       },
     }));
   };
-
-  function isNumber(value: ScoreValue): value is number {
-    return typeof value === "number";
-  }
   
   const totalScore = (player: PlayerName): number => {
-    return Object.values(scores[player] || {}).reduce(
-  	(sum, val) => sum + (isNumber(val) ? val : 0),
-  	0
-    );
+    const values = Object.values(scores[player] || {});
+    return values.reduce((sum, val) => sum + (isNumber(val) ? val : 0), 0);
   };
-
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-200 to-sky-300 p-6">
