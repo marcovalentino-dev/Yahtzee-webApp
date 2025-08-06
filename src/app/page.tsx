@@ -10,36 +10,47 @@ const categories = [
   "Aces", "Twos", "Threes", "Fours", "Fives", "Sixes",
   "Three of a Kind", "Four of a Kind", "Full House",
   "Small Straight", "Large Straight", "Yahtzee", "Chance"
-];
+] as const;
+
+type Category = typeof categories[number];
+type ScoreValue = number | ""; // Può essere numero o stringa vuota
+type PlayerName = string;
+
+type Scores = Record<PlayerName, Partial<Record<Category, ScoreValue>>>;
 
 export default function YahtzeeGame() {
-  const [players, setPlayers] = useState<string[]>([]);
-  const [playerName, setPlayerName] = useState("");
-  const [gameStarted, setGameStarted] = useState(false);
-  const [scores, setScores] = useState<Record<string, Record<string, number | string>>>({});
-
+  const [players, setPlayers] = useState<PlayerName[]>([]);
+  const [playerName, setPlayerName] = useState<string>("");
+  const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [scores, setScores] = useState<Scores>({});
 
   const addPlayer = () => {
-    if (!playerName.trim()) return;
-    setPlayers([...players, playerName.trim()]);
-    setScores({ ...scores, [playerName.trim()]: {} });
+    const trimmedName = playerName.trim();
+    if (!trimmedName) return;
+    if (players.includes(trimmedName)) return; // evita duplicati
+    setPlayers((prev) => [...prev, trimmedName]);
+    setScores((prev) => ({ ...prev, [trimmedName]: {} }));
     setPlayerName("");
   };
 
-  const handleScoreChange = (player: string, category: string, value: string | number) => {
+  const handleScoreChange = (
+    player: PlayerName,
+    category: Category,
+    value: string
+  ) => {
+    const parsed = parseInt(value);
     setScores((prev) => ({
       ...prev,
       [player]: {
         ...prev[player],
-        [category]: isNaN(parseInt(String(value))) ? "" : parseInt(String(value)),
+        [category]: isNaN(parsed) ? "" : parsed,
       },
     }));
   };
 
-
-  const totalScore = (player) => {
+  const totalScore = (player: PlayerName): number => {
     return Object.values(scores[player] || {}).reduce(
-      (sum, val) => sum + (parseInt(val) || 0),
+      (sum, val) => sum + (typeof val === "number" ? val : 0),
       0
     );
   };
@@ -67,9 +78,9 @@ export default function YahtzeeGame() {
                 <Button onClick={addPlayer}>Aggiungi</Button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {players.map((name, idx) => (
+                {players.map((name) => (
                   <span
-                    key={idx}
+                    key={name}
                     className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm"
                   >
                     {name}
@@ -85,18 +96,18 @@ export default function YahtzeeGame() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {players.map((player, idx) => (
-              <Card key={idx} className="rounded-2xl shadow-xl">
+            {players.map((player) => (
+              <Card key={player} className="rounded-2xl shadow-xl">
                 <CardContent className="p-4 space-y-2">
                   <h2 className="text-xl font-semibold text-indigo-800">{player}</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {categories.map((cat, i) => (
-                      <div key={i} className="flex flex-col">
+                    {categories.map((cat) => (
+                      <div key={cat} className="flex flex-col">
                         <label className="text-sm text-gray-600">{cat}</label>
                         <Input
                           type="number"
-                          min="0"
-                          value={scores[player]?.[cat] || ""}
+                          min={0}
+                          value={scores[player]?.[cat] === "" ? "" : scores[player]?.[cat] || ""}
                           onChange={(e) => handleScoreChange(player, cat, e.target.value)}
                         />
                       </div>
@@ -111,6 +122,7 @@ export default function YahtzeeGame() {
             <div className="bg-white p-4 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold mb-2">Classifica Finale</h2>
               {players
+                .slice() // per non mutare l'array originale
                 .sort((a, b) => totalScore(b) - totalScore(a))
                 .map((player, idx) => (
                   <p key={idx} className="text-lg">
