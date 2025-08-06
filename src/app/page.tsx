@@ -13,7 +13,7 @@ const categories = [
 ] as const;
 
 type Category = typeof categories[number];
-type ScoreValue = number | ""; // Può essere numero o stringa vuota
+type ScoreValue = number; // Può essere numero o stringa vuota
 type PlayerName = string;
 type ScoreSheet = Record<string, ScoreValue>;
 type ScoreState = Record<PlayerName, ScoreSheet>;
