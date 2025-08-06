@@ -26,7 +26,7 @@ export default function YahtzeeGame() {
     setPlayerName("");
   };
 
-  const handleScoreChange = (player, category, value) => {
+  const handleScoreChange = (player: string, category: string, value: number | string) => {
     setScores((prev) => ({
       ...prev,
       [player]: {
