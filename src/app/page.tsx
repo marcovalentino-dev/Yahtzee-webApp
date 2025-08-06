@@ -13,10 +13,11 @@ const categories = [
 ];
 
 export default function YahtzeeGame() {
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState<string[]>([]);
   const [playerName, setPlayerName] = useState("");
   const [gameStarted, setGameStarted] = useState(false);
-  const [scores, setScores] = useState({});
+  const [scores, setScores] = useState<Record<string, Record<string, number | string>>>({});
+
 
   const addPlayer = () => {
     if (!playerName.trim()) return;
