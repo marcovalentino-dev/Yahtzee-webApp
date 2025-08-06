@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 
+
 const categories = [
   "Aces", "Twos", "Threes", "Fours", "Fives", "Sixes",
   "Three of a Kind", "Four of a Kind", "Full House",
