@@ -26,15 +26,16 @@ export default function YahtzeeGame() {
     setPlayerName("");
   };
 
-  const handleScoreChange = (player: string, category: string, value: number | string) => {
+  const handleScoreChange = (player: string, category: string, value: string | number) => {
     setScores((prev) => ({
       ...prev,
       [player]: {
         ...prev[player],
-        [category]: isNaN(parseInt(value)) ? "" : parseInt(value),
+        [category]: isNaN(parseInt(String(value))) ? "" : parseInt(String(value)),
       },
     }));
   };
+
 
   const totalScore = (player) => {
     return Object.values(scores[player] || {}).reduce(
