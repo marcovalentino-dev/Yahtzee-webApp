@@ -13,16 +13,9 @@ const categories = [
 ] as const;
 
 type Category = typeof categories[number];
-type ScoreValue = number; // Può essere numero o stringa vuota
+type ScoreValue = number;
 type PlayerName = string;
-type ScoreSheet = Record<string, ScoreValue>;
-type ScoreState = Record<PlayerName, ScoreSheet>;
-
 type Scores = Record<PlayerName, Partial<Record<Category, ScoreValue>>>;
-
-  function isNumber(value: ScoreValue): value is number {
-    return typeof value === "number";
-  }
 
 export default function YahtzeeGame() {
   const [players, setPlayers] = useState<PlayerName[]>([]);
@@ -32,8 +25,7 @@ export default function YahtzeeGame() {
 
   const addPlayer = () => {
     const trimmedName = playerName.trim();
-    if (!trimmedName) return;
-    if (players.includes(trimmedName)) return; // evita duplicati
+    if (!trimmedName || players.includes(trimmedName)) return;
     setPlayers((prev) => [...prev, trimmedName]);
     setScores((prev) => ({ ...prev, [trimmedName]: {} }));
     setPlayerName("");
@@ -45,18 +37,19 @@ export default function YahtzeeGame() {
     value: string
   ) => {
     const parsed = parseInt(value);
+    if (isNaN(parsed)) return;
     setScores((prev) => ({
       ...prev,
       [player]: {
         ...prev[player],
-        [category]: isNaN(parsed) ? "" : parsed,
+        [category]: parsed,
       },
     }));
   };
-  
+
   const totalScore = (player: PlayerName): number => {
     const values = Object.values(scores[player] || {});
-    return values.reduce((sum, val) => sum + (isNumber(val) ? val : 0), 0);
+    return values.reduce((sum, val) => sum + (val || 0), 0);
   };
 
   return (
@@ -111,8 +104,10 @@ export default function YahtzeeGame() {
                         <Input
                           type="number"
                           min={0}
-                          value={scores[player]?.[cat] === "" ? "" : scores[player]?.[cat] || ""}
-                          onChange={(e) => handleScoreChange(player, cat, e.target.value)}
+                          value={scores[player]?.[cat]?.toString() || ""}
+                          onChange={(e) =>
+                            handleScoreChange(player, cat, e.target.value)
+                          }
                         />
                       </div>
                     ))}
@@ -126,11 +121,12 @@ export default function YahtzeeGame() {
             <div className="bg-white p-4 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold mb-2">Classifica Finale</h2>
               {players
-                .slice() // per non mutare l'array originale
+                .slice()
                 .sort((a, b) => totalScore(b) - totalScore(a))
                 .map((player, idx) => (
                   <p key={idx} className="text-lg">
-                    🏅 {player} — <span className="font-semibold">{totalScore(player)} punti</span>
+                    🏅 {player} —{" "}
+                    <span className="font-semibold">{totalScore(player)} punti</span>
                   </p>
                 ))}
             </div>
